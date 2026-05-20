@@ -1,7 +1,16 @@
 from rest_framework import serializers
 from .models import Cinematographer, Film
 
+
+class FilmBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Film
+        fields =['id', 'title', 'release_year', 'director', 'aspect_ratio']
+
+
 class CinematographerSerializer(serializers.ModelSerializer):
+    films = FilmBasicSerializer(many=True, read_only=True)
+
     class Meta:
         model = Cinematographer
         fields = '__all__'
