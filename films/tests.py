@@ -52,3 +52,39 @@ def test_create_film_authenticated(authenticated_client):
     }, format='json')
     assert response.status_code == status.HTTP_201_CREATED
     assert response.data['title'] == 'Test Film'
+
+
+@pytest.mark.django_db
+def test_list_shots(api_client, db):
+    response = api_client.get('/api/v1/shots/')
+    assert response.status_code == status.HTTP_200_OK
+
+
+
+@pytest.mark.django_db
+def test_create_shot_unauthenticated(api_client, db):
+    film = Film.objects.create(
+        title='Test Film',
+        release_year=2024,
+        director='Test Director',
+    )
+    response = api_client.post('/api/v1/shots/', {
+        'film_id': film.id,
+        'description': 'Test Shot',
+    }, format='json')
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+def test_create_shot_authenticated(authenticated_client):
+    film = Film.objects.create(
+        title='Test Film',
+        release_year=2024,
+        director='Test Director',
+    )
+    response = authenticated_client.post('/api/v1/shots/', {
+        'film_id': film.id,
+        'description': 'Test Shot',
+    }, format='json')
+    assert response.status_code == status.HTTP_201_CREATED, response.data
+    assert response.data['description'] == 'Test Shot'
