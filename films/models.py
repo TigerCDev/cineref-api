@@ -31,6 +31,9 @@ class Film(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        ordering =['-created_at']
+
 
 class Lens(models.Model):
     LENS_TYPE_CHOICES= [
@@ -87,6 +90,9 @@ class Shot(models.Model):
     def __str__(self):
         return f'Shot from {self.film.title} at {self.timestamp}'
 
+    class Meta:
+        ordering = ['-created_at']
+
 
 class LightingSetup(models.Model):
     SETUP_TYPE_CHOICES = [
@@ -114,3 +120,6 @@ class LightingSetup(models.Model):
 
     def __str__(self):
         return f'{self.setup_type} for shot {self.shot.id}'
+
+    class Meta:
+        ordering = ['id']
