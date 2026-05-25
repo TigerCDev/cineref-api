@@ -6,7 +6,8 @@ from .models import (
     Film,
     Cinematographer,
     Shot,
-    LightingSetup
+    LightingSetup,
+    Reference,
 )
 
 
@@ -159,3 +160,24 @@ def test_create_lighting_setup_authenticated(authenticated_client):
         'shot_id': shot.id,
     }, format='json')
     assert response.status_code == status.HTTP_201_CREATED
+
+
+@pytest.mark.django_db
+def test_listing_references(api_client, db):
+    Reference.objects.create(title='Test Reference', type='inspiration')
+
+    response = api_client.get('/api/v1/references/')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data['count'] == 1
+    assert response.data['results'][0]['title'] == 'Test Reference'
+
+
+@pytest.mark.django_db
+def test_create_reference_authenticated(authenticated_client):
+    response = authenticated_client.post('/api/v1/references/', {
+        'title': 'Test Reference',
+        'type': 'inspiration',
+    }, format='json')
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data['title'] == 'Test Reference'

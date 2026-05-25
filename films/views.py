@@ -10,6 +10,7 @@ from .models import (
     Lens,
     Shot,
     LightingSetup,
+    Reference
 )
 from .serializers import (
     CinematographerSerializer,
@@ -17,6 +18,7 @@ from .serializers import (
     LensSerializer,
     ShotSerializer,
     LightingSetupSerializer,
+    ReferenceSerializer
 )
 from .filters import FilmFilter, ShotFilter
 
@@ -64,7 +66,11 @@ class ShotViewSet(viewsets.ModelViewSet):
     filterset_class = ShotFilter
 
 
-
 class LightingSetupViewSet(viewsets.ModelViewSet):
     queryset = LightingSetup.objects.all()
     serializer_class = LightingSetupSerializer
+
+
+class ReferencesViewSet(viewsets.ModelViewSet):
+    queryset = Reference.objects.all()
+    serializer_class = ReferenceSerializer

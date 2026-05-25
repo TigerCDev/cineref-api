@@ -123,3 +123,43 @@ class LightingSetup(models.Model):
 
     class Meta:
         ordering = ['id']
+
+
+class Reference(models.Model):
+    TYPE_CHOICES = [
+        ('inspiration', 'Inspiration'),
+        ('technique', 'Technique'),
+        ('director_study', 'Director Study'),
+    ]
+
+    title = models.CharField(max_length=255)
+    type = models.CharField(
+        max_length=50,
+        choices=TYPE_CHOICES,
+        default='inspiration',
+    )
+    linked_film = models.ManyToManyField(
+        Film,
+        blank=True,
+        related_name='references',
+    )
+    linked_shot = models.ManyToManyField(
+        Shot,
+        blank=True,
+        related_name='references'
+    )
+    notes = models.TextField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='references'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
