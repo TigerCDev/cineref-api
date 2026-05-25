@@ -86,3 +86,31 @@ class Shot(models.Model):
 
     def __str__(self):
         return f'Shot from {self.film.title} at {self.timestamp}'
+
+
+class LightingSetup(models.Model):
+    SETUP_TYPE_CHOICES = [
+        ('three_point', 'Three Point'),
+        ('motivated', 'Motivated'),
+        ('natural', 'Natural'),
+        ('high_key', 'High Key'),
+        ('low_key', 'Low Key'),
+        ('other', 'Other'),
+    ]
+
+    shot = models.ForeignKey(
+        Shot,
+        on_delete=models.CASCADE,
+        related_name='lighting_setups',
+    )
+    setup_type = models.CharField(
+        max_length=50,
+        choices=SETUP_TYPE_CHOICES,
+        default='other'
+    )
+    key_light_notes = models.TextField(null=True, blank=True)
+    fill_notes = models.TextField(null=True, blank=True)
+    equipment_list = models.JSONField(default=list, blank=True)
+
+    def __str__(self):
+        return f'{self.setup_type} for shot {self.shot.id}'

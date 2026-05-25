@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cinematographer, Film, Lens, Shot
+from .models import Cinematographer, Film, Lens, Shot, LightingSetup
 
 
 class FilmBasicSerializer(serializers.ModelSerializer):
@@ -58,4 +58,17 @@ class ShotSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Shot
+        fields = '__all__'
+
+
+class LightingSetupSerializer(serializers.ModelSerializer):
+    shot = ShotSerializer(read_only=True)
+    shot_id = serializers.PrimaryKeyRelatedField(
+        queryset=Shot.objects.all(),
+        source='shot',
+        write_only=True,
+    )
+
+    class Meta:
+        model = LightingSetup
         fields = '__all__'

@@ -2,7 +2,12 @@ from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework import status
 import pytest
-from .models import Film, Cinematographer, Shot
+from .models import (
+    Film,
+    Cinematographer,
+    Shot,
+    LightingSetup
+)
 
 
 
@@ -97,8 +102,8 @@ def test_filter_films_by_year(api_client, db):
 
     response = api_client.get('/api/v1/films/?release_year=2017')
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data) == 1
-    assert response.data[0]['title'] == 'Film A'
+    assert len(response.data['results']) == 1
+    assert response.data['results'][0]['title'] == 'Film A'
 
 
 @pytest.mark.django_db
@@ -108,8 +113,8 @@ def test_filter_film_by_director(api_client, db):
 
     response = api_client.get('/api/v1/films/?director=villeneuve')
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data) == 1
-    assert response.data[0]['title'] == 'Film A'
+    assert len(response.data['results']) == 1
+    assert response.data['results'][0]['title'] == 'Film A'
 
 
 @pytest.mark.django_db
@@ -121,5 +126,36 @@ def test_filter_shots_by_film(api_client, db):
 
     response = api_client.get(f'/api/v1/shots/?film={film_a.id}')
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data) == 1
-    assert response.data[0]['description'] == 'Shot 1'
+    assert len(response.data['results']) == 1
+    assert response.data['results'][0]['description'] == 'Shot 1'
+
+
+@pytest.mark.django_db
+def test_search_film(api_client, db):
+    Film.objects.create(title='Blade Runner 2049', release_year=2017, director='Denis Villeneuve')
+    Film.objects.create(title='Oppenheimer', release_year=2023, director='Chirstopher Nolan')
+
+    response = api_client.get('/api/v1/films/search/?q=blade+runner')
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data) >= 1
+    assert response.data[0]['title'] == 'Blade Runner 2049'
+
+
+@pytest.mark.django_db
+def test_list_lighting_setups(api_client, db):
+    response = api_client.get('/api/v1/lightingsetups/')
+    assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+def test_create_lighting_setup_authenticated(authenticated_client):
+    film = Film.objects.create(
+        title='Test Film',
+        release_year=2026,
+        director='Test Director',
+    )
+    shot = Shot.objects.create(film=film, description='Test Shot')
+    response = authenticated_client.post('/api/v1/lightingsetups/', {
+        'shot_id': shot.id,
+    }, format='json')
+    assert response.status_code == status.HTTP_201_CREATED
