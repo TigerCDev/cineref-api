@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework import status
 import pytest
-from .models import Film, Cinematographer
+from .models import Film, Cinematographer, Shot
 
 
 
@@ -88,3 +88,38 @@ def test_create_shot_authenticated(authenticated_client):
     }, format='json')
     assert response.status_code == status.HTTP_201_CREATED, response.data
     assert response.data['description'] == 'Test Shot'
+
+
+@pytest.mark.django_db
+def test_filter_films_by_year(api_client, db):
+    Film.objects.create(title='Film A', release_year=2017, director='Director A')
+    Film.objects.create(title='Film B', release_year=2020, director='Director B')
+
+    response = api_client.get('/api/v1/films/?release_year=2017')
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data) == 1
+    assert response.data[0]['title'] == 'Film A'
+
+
+@pytest.mark.django_db
+def test_filter_film_by_director(api_client, db):
+    Film.objects.create(title='Film A', release_year=2017, director='Denis Villeneuve')
+    Film.objects.create(title='Film B', release_year=2020, director='Christopher Nolan')
+
+    response = api_client.get('/api/v1/films/?director=villeneuve')
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data) == 1
+    assert response.data[0]['title'] == 'Film A'
+
+
+@pytest.mark.django_db
+def test_filter_shots_by_film(api_client, db):
+    film_a = Film.objects.create(title='Film A', release_year=2017, director='Director A')
+    film_b = Film.objects.create(title='Film B', release_year=2020, director='Director B')
+    Shot.objects.create(film=film_a, description='Shot 1')
+    Shot.objects.create(film=film_b, description='Shot 2')
+
+    response = api_client.get(f'/api/v1/shots/?film={film_a.id}')
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data) == 1
+    assert response.data[0]['description'] == 'Shot 1'
