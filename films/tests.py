@@ -10,6 +10,8 @@ from .models import (
     Reference,
 )
 
+from unittest.mock import patch
+from .tasks import sync_tmdb_for_film
 
 
 @pytest.fixture
@@ -181,3 +183,26 @@ def test_create_reference_authenticated(authenticated_client):
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.data['title'] == 'Test Reference'
+
+
+@pytest.mark.django_db
+def test_sync_tmdb_for_film_task(db):
+    film = Film.objects.create(
+        title='Blade Runner 2049',
+        release_year=2017,
+        director='Denis Villeneuve',
+    )
+
+    with patch('films.tasks.fetch_film_details') as mock_fetch:
+        mock_fetch.return_value = {
+            'tmdb_id': 335984,
+            'title': 'Blade Runner 2049',
+            'release_year': '2017',
+            'synopsis': 'A new blade runner unearths a secret.',
+            'poster_path': '/some/path.jpg',
+        }
+        result = sync_tmdb_for_film(film.id)
+
+    film.refresh_from_db()
+    assert result == f"Updated film {film.title} with TMDB data"
+    assert film.synopsis == 'A new blade runner unearths a secret.'
