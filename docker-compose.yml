@@ -10,6 +10,7 @@ services:
       - .env
     depends_on:
       - db
+      - redis
 
   db:
     image: postgres:16
@@ -19,6 +20,20 @@ services:
       POSTGRES_DB: cineref
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+
+  redis:
+    image: redis:7-alpine
+
+  celery:
+    build: .
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
 
 volumes:
   postgres_data:

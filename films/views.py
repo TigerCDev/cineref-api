@@ -21,6 +21,7 @@ from .serializers import (
     ReferenceSerializer
 )
 from .filters import FilmFilter, ShotFilter
+from .tasks import sync_tmdb_for_film
 
 
 
@@ -34,6 +35,10 @@ class FilmViewSet(viewsets.ModelViewSet):
     serializer_class = FilmSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = FilmFilter
+
+    def perform_create(self, serializer):
+        film = serializer.save()
+        sync_tmdb_for_film.delay(film.id)
 
     @action(detail=False, methods=['get'], url_path='search')
     def search(self, request):
