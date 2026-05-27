@@ -10,8 +10,10 @@ from .models import (
     Reference,
 )
 
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+from tmdb_client import fetch_film_details
 from .tasks import sync_tmdb_for_film
+import requests
 
 
 @pytest.fixture
@@ -206,3 +208,34 @@ def test_sync_tmdb_for_film_task(db):
     film.refresh_from_db()
     assert result == f"Updated film {film.title} with TMDB data"
     assert film.synopsis == 'A new blade runner unearths a secret.'
+
+
+@pytest.mark.django_db
+def test_sync_tmdb_film_not_found(db):
+    film = Film.objects.create(
+        title='Nonexistent Film XYZ',
+        release_year=2024,
+        director='Nobody'
+    )
+    with patch('films.tasks.fetch_film_details') as mock_fetch:
+        mock_fetch.return_value = None
+        result = sync_tmdb_for_film(film.id)
+    assert result == f'No TMDB data found for {film.title}'
+
+
+def test_fetch_film_details_film_not_found():
+    with patch('tmdb_client.requests.get') as mock_get:
+        mock_response = MagicMock()
+        mock_response.json.return_value = {'results': []}
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+
+        result = fetch_film_details('Nonexistent Film XYZ', 2024)
+        assert result is None
+
+
+def test_fetch_film_details_timeout():
+    with patch('tmdb_client.requests.get') as mock_get:
+        mock_get.side_effect = requests.exceptions.Timeout()
+        with pytest.raises(Exception, match='timed out'):
+            fetch_film_details('Blade Runner 2049', 2017)
