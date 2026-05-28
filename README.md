@@ -28,7 +28,7 @@ A REST API for cataloging and querying cinematography reference data — films, 
 
 ## Architecture
 
-[Add architecture diagram here]
+![Architecture](architecture.png)
 
 ## Endpoints
 
