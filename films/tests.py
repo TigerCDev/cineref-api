@@ -239,3 +239,26 @@ def test_fetch_film_details_timeout():
         mock_get.side_effect = requests.exceptions.Timeout()
         with pytest.raises(Exception, match='timed out'):
             fetch_film_details('Blade Runner 2049', 2017)
+
+
+@pytest.mark.django_db
+def test_get_nonexistent_film(api_client, db):
+    response = api_client.get('/api/v1/films/99999/')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_invalid_jwt_token(api_client, db):
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer invalidtoken123')
+    response = api_client.post('/api/v1/films/', {
+        'title': 'Test Film',
+        'release_year': 2024,
+        'director': 'Test Director',
+    }, format='json')
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db()
+def test_malformed_filter_params(api_client, db):
+    response = api_client.get('/api/v1/films/?release_year=notanumber')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
