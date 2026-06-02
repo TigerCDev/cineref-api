@@ -31,7 +31,7 @@ class CinematographerViewSet(viewsets.ModelViewSet):
 
 
 class FilmViewSet(viewsets.ModelViewSet):
-    queryset = Film.objects.all()
+    queryset = Film.objects.select_related('cinematographer')
     serializer_class = FilmSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = FilmFilter
