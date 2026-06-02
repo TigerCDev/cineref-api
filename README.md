@@ -2,7 +2,7 @@
 
 > A production-grade cinematography reference REST API built with Django, DRF, PostgreSQL, and Docker.
 
-**Live:** https://cineref-api.fly.dev · **Docs:** https://cineref-api.fly.dev/api/schema/swagger-ui/
+**Live:** https://cineref-api.fly.dev/api/v1/films/ · **Docs:** https://cineref-api.fly.dev/api/schema/swagger-ui/
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Django](https://img.shields.io/badge/Django-6.0-green)
@@ -56,7 +56,7 @@ cp .env.example .env  # add your TMDB_API_KEY
 docker compose up --build
 ```
 
-Visit http://localhost:8000/api/schema/swagger-ui/
+Visit https://cineref-api.fly.dev/api/schema/swagger-ui/
 
 ## Run tests
 
@@ -76,4 +76,5 @@ docker compose exec web pytest --cov=. --cov-report=term-missing
 ## Why this exists
 
 Built to bridge my background in film production and software engineering. The domain exposes interesting technical problems — relational data modeling, external API reliability, async task processing — that general CRUD projects don't. Every line of code is mine.
+
 Open to Junior Python Backend Developer roles (remote, Australia, or international via EOR).
