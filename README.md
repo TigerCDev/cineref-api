@@ -76,3 +76,4 @@ docker compose exec web pytest --cov=. --cov-report=term-missing
 ## Why this exists
 
 Built to bridge my background in film production and software engineering. The domain exposes interesting technical problems — relational data modeling, external API reliability, async task processing — that general CRUD projects don't. Every line of code is mine.
+Open to Junior Python Backend Developer roles (remote, Australia, or international via EOR).
