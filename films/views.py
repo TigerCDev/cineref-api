@@ -60,22 +60,22 @@ class FilmViewSet(viewsets.ModelViewSet):
 
 
 class LensViewSet(viewsets.ModelViewSet):
-    queryset = Lens.objects.all()
+    queryset = Lens.objects.prefetch_related('notable_films')
     serializer_class = LensSerializer
 
 
 class ShotViewSet(viewsets.ModelViewSet):
-    queryset = Shot.objects.all()
+    queryset = Shot.objects.select_related('film', 'lens_used', 'created_by')
     serializer_class = ShotSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ShotFilter
 
 
 class LightingSetupViewSet(viewsets.ModelViewSet):
-    queryset = LightingSetup.objects.all()
+    queryset = LightingSetup.objects.select_related('shot')
     serializer_class = LightingSetupSerializer
 
 
 class ReferencesViewSet(viewsets.ModelViewSet):
-    queryset = Reference.objects.all()
+    queryset = Reference.objects.select_related('created_by').prefetch_related('linked_film', 'linked_shot')
     serializer_class = ReferenceSerializer
